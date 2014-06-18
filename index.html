@@ -19,16 +19,21 @@
 <script src="slowparse.js"></script>
 <script src="jquery.js"></script>
 <script>
+var cm = CodeMirror($("#source")[0], {
+  value: '',
+  theme: 'pastel-on-dark',
+  mode: 'htmlmixed'
+});
+
+cm.on('change', function() {
+  $("#rendering").html(cm.getValue());
+});
+
 $(function() {
   $.get('contents.html', function(html) {
     var result = Slowparse.HTML(document, html);
 
-    var cm = CodeMirror($("#source")[0], {
-      value: html,
-      theme: 'pastel-on-dark',
-      mode: 'htmlmixed'
-    });
-    $("#rendering").append(result.document);
+    cm.setValue(html);
   });
 });
 </script>
