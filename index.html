@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<meta charset"utf-8">
+<link rel="stylesheet" href="codemirror-4.2/lib/codemirror.css">
+<link rel="stylesheet" href="codemirror-4.2/theme/pastel-on-dark.css">
+<link rel="stylesheet" href="bootstrap3/css/bootstrap.css">
+<title>HTML5 Cruise Control Demo</title>
+<div class="container">
+  <h1>HTML5 Cruise Control Demo</h1>
+  <div class="row">
+    <div class="col-sm-6" id="rendering"></div>
+    <div class="col-sm-6" id="source"></div>
+  </div>
+</div>
+<script src="codemirror-4.2/lib/codemirror.js"></script>
+<script src="codemirror-4.2/mode/xml/xml.js"></script>
+<script src="codemirror-4.2/mode/javascript/javascript.js"></script>
+<script src="codemirror-4.2/mode/css/css.js"></script>
+<script src="codemirror-4.2/mode/htmlmixed/htmlmixed.js"></script>
+<script src="slowparse.js"></script>
+<script src="jquery.js"></script>
+<script>
+$(function() {
+  $.get('contents.html', function(html) {
+    var result = Slowparse.HTML(document, html);
+
+    var cm = CodeMirror($("#source")[0], {
+      value: html,
+      theme: 'pastel-on-dark',
+      mode: 'htmlmixed'
+    });
+    $("#rendering").append(result.document);
+  });
+});
+</script>
