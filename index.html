@@ -36,6 +36,7 @@
 <script src="slowparse.js"></script>
 <script src="jquery.js"></script>
 <script>
+var inCruiseControl = false;
 var cm = CodeMirror($("#source")[0], {
   value: '',
   theme: 'pastel-on-dark',
@@ -45,19 +46,19 @@ var cm = CodeMirror($("#source")[0], {
 var cruiseControls = {
   'click #change-first-p': {
     selector: 'p',
-    execute: function(el) {
+    execute: function(el, control, done) {
       response = prompt('What should the paragraph say?');
-      if (response !== null)
-        doOperation(cm, changeText(el, response), 100);
+      if (response === null) return done();
+      doOperation(cm, changeText(el, response), 100, done);
     }
   },
   'change #change-first-img': {
     selector: 'img[src]',
-    execute: function(el, control) {
+    execute: function(el, control, done) {
       var src = control.val();
       var op = changeAttr(el, 'src', src);
       op.withClipboard = true;
-      doOperation(cm, op, 500);
+      doOperation(cm, op, 500, done);
     }
   }
 };
@@ -157,7 +158,8 @@ function doOperation(cm, op, speed, cb) {
   } else throw new Error('unknown operation type: ' + op.type);
 }
 
-cm.on('change', function() {
+function reparseCode() {
+  if (inCruiseControl) return;
   var html = cm.getValue();
   var slowparse = Slowparse.HTML(document, html);
   var doc = slowparse && slowparse.document;
@@ -186,10 +188,17 @@ cm.on('change', function() {
       control.attr('disabled', '');
     else
       control.on(eventName, function(e) {
-        options.execute(el, control);
+        if (inCruiseControl) return;
+        inCruiseControl = true;
+        options.execute(el, control, function() {
+          inCruiseControl = false;
+          reparseCode();
+        });
       });
   });
-});
+}
+
+cm.on('change', reparseCode);
 
 $(function() {
   cm.focus();
