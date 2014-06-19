@@ -10,6 +10,8 @@
     <div class="col-sm-6" id="rendering"></div>
     <div class="col-sm-6" id="source"></div>
   </div>
+  <br>
+  <button class="form-control btn btn-default js-change-html" id="change-first-p">Change the first paragraph&hellip;</button>
 </div>
 <script src="codemirror-4.2/lib/codemirror.js"></script>
 <script src="codemirror-4.2/mode/xml/xml.js"></script>
@@ -25,14 +27,102 @@ var cm = CodeMirror($("#source")[0], {
   mode: 'htmlmixed'
 });
 
+function changeText(el, newText) {
+  var container = document.createElement('div');
+  container.textContent = newText;
+
+  return {
+    type: 'replace',
+    start: el.parseInfo.openTag.end,
+    end: el.parseInfo.closeTag.start,
+    content: container.innerHTML
+  };
+}
+
+function slowlyDeleteRange(cm, from, to, speed, cb) {
+  var i = to - from;
+
+  function deleteNextChar() {
+    if (i-- == 0) return cb();
+    cm.execCommand('delCharBefore');
+    setTimeout(deleteNextChar, speed);
+  }
+
+  cm.setCursor(cm.posFromIndex(to));
+  deleteNextChar();
+}
+
+function slowlyTypeChars(cm, start, chars, speed, cb) {
+  chars = chars.split('');
+
+  function typeNextChar() {
+    if (chars.length == 0) return cb();
+
+    cm.setCursor(cm.posFromIndex(start));
+    cm.replaceRange(chars.shift(), cm.posFromIndex(start++));
+    setTimeout(typeNextChar, speed);
+  }
+
+  typeNextChar();
+}
+
+function doOperation(cm, op, speed, cb) {
+  var value = cm.getValue();
+
+  cb = cb || function() {};
+  cm.focus();
+  if (op.type == 'replace') {
+    if (speed == 0)
+      setTimeout(function() {
+        cm.replaceRange(op.content, cm.posFromIndex(op.start),
+                        cm.posFromIndex(op.end));
+        cb();
+      }, 0);
+    else
+      slowlyDeleteRange(cm, op.start, op.end, speed, function() {
+        slowlyTypeChars(cm, op.start, op.content, speed, cb);
+      });
+  } else throw new Error('unknown operation type: ' + op.type);
+}
+
+$.fn.extend({
+  toggleDisabled: function(val) {
+    if (val)
+      this.attr('disabled', '');
+    else
+      this.removeAttr('disabled');
+  }
+});
+
 cm.on('change', function() {
-  $("#rendering").html(cm.getValue());
+  var html = cm.getValue();
+  var slowparse = Slowparse.HTML(document, html);
+  var doc = slowparse && slowparse.document;
+
+  $("#rendering").html(html);
+
+  if (slowparse.error) {
+    $('.js-change-html').attr('disabled', '');
+  } else {
+    $('.js-change-html').removeAttr('disabled');
+  }
+
+  $('.js-change-html').unbind();
+
+  if (!doc) return;
+
+  if (!doc.querySelector('p'))
+    $('#change-first-p').attr('disabled', '');
+
+  $('#change-first-p').click(function() {
+    doOperation(cm, changeText(doc.querySelector('p'), 'lolwut'), 100);
+  });
 });
 
 $(function() {
-  $.get('contents.html', function(html) {
-    var result = Slowparse.HTML(document, html);
+  cm.focus();
 
+  $.get('contents.html', function(html) {
     cm.setValue(html);
   });
 });
