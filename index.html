@@ -161,16 +161,17 @@ cm.on('change', function() {
   var html = cm.getValue();
   var slowparse = Slowparse.HTML(document, html);
   var doc = slowparse && slowparse.document;
+  var allControls = $('.js-change-html');
 
   $("#rendering").html(html);
 
   if (slowparse.error) {
-    $('.js-change-html').attr('disabled', '');
+    allControls.attr('disabled', '');
   } else {
-    $('.js-change-html').removeAttr('disabled');
+    allControls.removeAttr('disabled');
   }
 
-  $('.js-change-html').unbind();
+  allControls.unbind();
 
   if (!doc) return;
 
