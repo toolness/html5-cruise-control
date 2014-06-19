@@ -1,6 +1,6 @@
 This is a prototype of a simple two-paned editor that adds
 affordances to learn HTML in a way that's slightly reminiscent
-of [Let Me Google That For You](http://lmgtfy.com/?q=beans), albeit
+of [Let Me Google That For You](http://lmgtfy.com/?q=condescend), albeit
 with much less condescension.
 
 The prototype is all static HTML, though because it uses
