@@ -178,7 +178,8 @@ cm.on('change', function() {
 
   $('#change-first-p').click(function() {
     response = prompt('What should the paragraph say?');
-    doOperation(cm, changeText(doc.querySelector('p'), response), 100);
+    if (response !== null)
+      doOperation(cm, changeText(doc.querySelector('p'), response), 100);
   });
 });
 
