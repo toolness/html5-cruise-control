@@ -115,7 +115,8 @@ cm.on('change', function() {
     $('#change-first-p').attr('disabled', '');
 
   $('#change-first-p').click(function() {
-    doOperation(cm, changeText(doc.querySelector('p'), 'lolwut'), 100);
+    response = prompt('What should the paragraph say?');
+    doOperation(cm, changeText(doc.querySelector('p'), response), 100);
   });
 });
 
