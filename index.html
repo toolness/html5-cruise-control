@@ -11,6 +11,12 @@
     <div class="col-sm-6" id="source"></div>
   </div>
   <br>
+  <label for="change-first-img">Set the first image to a&hellip;</label>
+  <select class="form-control js-change-html" id="change-first-img" autocomplete="off">
+    <option value="http://placekitten.com/100/100">Cat</option>
+    <option value="http://mozorg.cdn.mozilla.net/media/img/styleguide/identity/firefox/usage-logo.png">Firefox logo</option>
+  </select>
+  <br>
   <button class="form-control btn btn-default js-change-html" id="change-first-p">Change the first paragraph&hellip;</button>
 </div>
 <script src="codemirror-4.2/lib/codemirror.js"></script>
@@ -37,6 +43,32 @@ function changeText(el, newText) {
     end: el.parseInfo.closeTag.start,
     content: container.innerHTML
   };
+}
+
+function getAttrNode(el, attr) {
+  attr = attr.toLowerCase();
+  for (var i = 0; i < el.attributes.length; i++) {
+    var attrNode = el.attributes[i];
+    if (attrNode.nodeName.toLowerCase() == attr) return attrNode;
+  }
+}
+
+function changeAttr(el, attr, newSafeValue) {
+  var parseInfo = getAttrNode(el, attr).parseInfo;
+  var op = {
+    type: 'replace',
+    content: newSafeValue
+  };
+
+  if (parseInfo.value) {
+    op.start = parseInfo.value.start + 1;
+    op.end = parseInfo.value.end - 1;
+  } else {
+    op.start = op.end = parseInfo.name.end;
+    op.content = '="' + newSafeValue + '"';
+  }
+
+  return op;
 }
 
 function slowlyDeleteRange(cm, from, to, speed, cb) {
@@ -72,16 +104,27 @@ function doOperation(cm, op, speed, cb) {
   cb = cb || function() {};
   cm.focus();
   if (op.type == 'replace') {
+    var startPos = cm.posFromIndex(op.start);
+    var endPos = cm.posFromIndex(op.end);
     if (speed == 0)
       setTimeout(function() {
-        cm.replaceRange(op.content, cm.posFromIndex(op.start),
-                        cm.posFromIndex(op.end));
+        cm.replaceRange(op.content, startPos, endPos);
         cb();
       }, 0);
-    else
+    else if (op.withClipboard) {
+      cm.setSelection(startPos, endPos);
+      setTimeout(function() {
+        cm.replaceRange('', startPos, endPos);
+        setTimeout(function() {
+          cm.replaceRange(op.content, startPos, startPos);
+          cb();
+        }, speed);
+      }, speed);
+    } else {
       slowlyDeleteRange(cm, op.start, op.end, speed, function() {
         slowlyTypeChars(cm, op.start, op.content, speed, cb);
       });
+    }
   } else throw new Error('unknown operation type: ' + op.type);
 }
 
@@ -113,6 +156,16 @@ cm.on('change', function() {
 
   if (!doc.querySelector('p'))
     $('#change-first-p').attr('disabled', '');
+
+  if (!doc.querySelector('img[src]'))
+    $('#change-first-img').attr('disabled', '');
+
+  $('#change-first-img').change(function() {
+    var src = $(this).val();
+    var op = changeAttr(doc.querySelector('img[src]'), 'src', src);
+    op.withClipboard = true;
+    doOperation(cm, op, 500);
+  });
 
   $('#change-first-p').click(function() {
     response = prompt('What should the paragraph say?');
