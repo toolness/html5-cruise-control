@@ -42,6 +42,26 @@ var cm = CodeMirror($("#source")[0], {
   mode: 'htmlmixed'
 });
 
+var cruiseControls = {
+  'click #change-first-p': {
+    selector: 'p',
+    execute: function(el) {
+      response = prompt('What should the paragraph say?');
+      if (response !== null)
+        doOperation(cm, changeText(el, response), 100);
+    }
+  },
+  'change #change-first-img': {
+    selector: 'img[src]',
+    execute: function(el, control) {
+      var src = control.val();
+      var op = changeAttr(el, 'src', src);
+      op.withClipboard = true;
+      doOperation(cm, op, 500);
+    }
+  }
+};
+
 function changeText(el, newText) {
   var container = document.createElement('div');
   container.textContent = newText;
@@ -154,23 +174,19 @@ cm.on('change', function() {
 
   if (!doc) return;
 
-  if (!doc.querySelector('p'))
-    $('#change-first-p').attr('disabled', '');
+  Object.keys(cruiseControls).forEach(function(str) {
+    var parts = str.split(' ');
+    var eventName = parts[0];
+    var control = $(parts[1]);
+    var options = cruiseControls[str];
+    var el = doc.querySelector(options.selector);
 
-  if (!doc.querySelector('img[src]'))
-    $('#change-first-img').attr('disabled', '');
-
-  $('#change-first-img').change(function() {
-    var src = $(this).val();
-    var op = changeAttr(doc.querySelector('img[src]'), 'src', src);
-    op.withClipboard = true;
-    doOperation(cm, op, 500);
-  });
-
-  $('#change-first-p').click(function() {
-    response = prompt('What should the paragraph say?');
-    if (response !== null)
-      doOperation(cm, changeText(doc.querySelector('p'), response), 100);
+    if (!el)
+      control.attr('disabled', '');
+    else
+      control.on(eventName, function(e) {
+        options.execute(el, control);
+      });
   });
 });
 
