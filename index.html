@@ -137,15 +137,6 @@ function doOperation(cm, op, speed, cb) {
   } else throw new Error('unknown operation type: ' + op.type);
 }
 
-$.fn.extend({
-  toggleDisabled: function(val) {
-    if (val)
-      this.attr('disabled', '');
-    else
-      this.removeAttr('disabled');
-  }
-});
-
 cm.on('change', function() {
   var html = cm.getValue();
   var slowparse = Slowparse.HTML(document, html);
