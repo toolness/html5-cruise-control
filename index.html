@@ -3,6 +3,19 @@
 <link rel="stylesheet" href="codemirror-4.2/lib/codemirror.css">
 <link rel="stylesheet" href="codemirror-4.2/theme/pastel-on-dark.css">
 <link rel="stylesheet" href="bootstrap3/css/bootstrap.css">
+<style>
+.media[data-achievement] .glyphicon {
+  font-size: 20px;
+}
+
+.media[data-achievement] .glyphicon-remove {
+  color: darkred;
+}
+
+.media[data-achievement] .glyphicon-ok {
+  color: green;
+}
+</style>
 <title>HTML5 Cruise Control Demo</title>
 <div class="container">
   <h1>HTML5 Cruise Control Demo</h1>
@@ -26,6 +39,30 @@
       <button class="form-control btn btn-default js-change-html" id="change-first-p">Change the first paragraph&hellip;</button>
     </div>
   </div>
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Manual Override</h3>
+    </div>
+    <div class="panel-body">
+      <p>Think you've got the hang of cruise control? Now try completing the following challenges by editing the HTML yourself!</p>
+      <ul class="media-list">
+        <li class="media" data-achievement="em">
+          <span class="pull-left media-object glyphicon glyphicon-remove"></span>
+          <div class="media-body">
+            Put some <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/em" target="_blank">emphasized</a> text in the first paragraph.
+          </div>
+        </li>
+        <li class="media" data-achievement="img">
+          <span class="pull-left media-object glyphicon glyphicon-remove"></span>
+          <div class="media-body">
+            Change the image to be one from your favorite website.
+          </div>
+        </li>
+      </ul>      
+    </div>
+  </div>
+
   <p class="text-right"><small><a href="https://github.com/toolness/html5-cruise-control">Fork me on GitHub</a></small></p>
 </div>
 <script src="codemirror-4.2/lib/codemirror.js"></script>
@@ -42,6 +79,28 @@ var cm = CodeMirror($("#source")[0], {
   theme: 'pastel-on-dark',
   mode: 'htmlmixed'
 });
+
+var achievements = {
+  em: function(el, cb) {
+    cb(!!$('p > em', el).text());
+  },
+  img: function(el, cb) {
+    $('img', el).one('load error', function(e) {
+      if (e.type == 'error') return cb(false);
+
+      var achieved = true;
+      var src = $(this).attr('src');
+
+      $('#change-first-img option').each(function() {
+        if ($(this).val() == src)
+          achieved= false;
+      });
+      if (/^https?:\/\/placekitten.com\//.test(src))
+        achieved = false;
+      cb(achieved);
+    });
+  }
+};
 
 var cruiseControls = {
   'click #change-first-p': {
@@ -175,7 +234,7 @@ function reparseCode() {
 
   allControls.unbind();
 
-  if (!doc) return;
+  if (slowparse.error) return;
 
   Object.keys(cruiseControls).forEach(function(str) {
     var parts = str.split(' ');
@@ -195,6 +254,15 @@ function reparseCode() {
           reparseCode();
         });
       });
+  });
+
+  Object.keys(achievements).forEach(function(name) {
+    achievements[name]($("#rendering"), function(achieved) {
+      var el = $('[data-achievement="' + name + '"]');
+      $('.glyphicon', el)
+        .toggleClass('glyphicon-remove', !achieved)
+        .toggleClass('glyphicon-ok', achieved);
+    });
   });
 }
 
