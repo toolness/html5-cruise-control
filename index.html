@@ -59,6 +59,12 @@
             Change the first image to one from your favorite website.
           </div>
         </li>
+        <li class="media" data-achievement="rebeccapurple">
+          <span class="pull-left media-object glyphicon glyphicon-remove"></span>
+          <div class="media-body">
+            Change the color of the first paragraph to <a href="http://meyerweb.com/eric/thoughts/2014/06/19/rebeccapurple/" target="_blank">rebeccapurple</a>.
+          </div>
+        </li>
       </ul>      
     </div>
   </div>
@@ -99,6 +105,10 @@ var achievements = {
         achieved = false;
       cb(achieved);
     });
+  },
+  rebeccapurple: function(el, cb) {
+    var color = $('p', el).first().css('color');
+    cb(/102,\s*51,\s*153/.test(color) || /663399/.test(color));
   }
 };
 
