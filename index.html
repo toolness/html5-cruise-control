@@ -275,9 +275,9 @@ function reparseCode() {
     else
       control.on(eventName, function(e) {
         if (inCruiseControl) return;
-        inCruiseControl = true;
+        inCruiseControl = cm.options.readOnly = true;
         options.execute(el, control, function() {
-          inCruiseControl = false;
+          inCruiseControl = cm.options.readOnly = false;
           reparseCode();
         });
       });
