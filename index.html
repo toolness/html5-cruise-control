@@ -56,7 +56,7 @@
         <li class="media" data-achievement="img">
           <span class="pull-left media-object glyphicon glyphicon-remove"></span>
           <div class="media-body">
-            Change the image to be one from your favorite website.
+            Change the first image to one from your favorite website.
           </div>
         </li>
       </ul>      
@@ -82,10 +82,10 @@ var cm = CodeMirror($("#source")[0], {
 
 var achievements = {
   em: function(el, cb) {
-    cb(!!$('p > em', el).text());
+    cb(!!$('p > em', el).first().text());
   },
   img: function(el, cb) {
-    $('img', el).one('load error', function(e) {
+    $('img', el).first().one('load error', function(e) {
       if (e.type == 'error') return cb(false);
 
       var achieved = true;
