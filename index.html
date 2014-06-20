@@ -2,7 +2,7 @@
 <meta charset"utf-8">
 <meta name="viewport" content="width=device-width, user-scalable=no">
 <link rel="stylesheet" href="codemirror-4.2/lib/codemirror.css">
-<link rel="stylesheet" href="codemirror-4.2/theme/pastel-on-dark.css">
+<link rel="stylesheet" href="codemirror-4.2/theme/neo.css">
 <link rel="stylesheet" href="bootstrap3/css/bootstrap.css">
 <link rel="stylesheet" href="font-awesome-4.1.0/css/font-awesome.css">
 <style>
@@ -98,7 +98,8 @@ footer a {
 var inCruiseControl = false;
 var cm = CodeMirror($("#source")[0], {
   value: '',
-  theme: 'pastel-on-dark',
+  theme: 'neo',
+  lineNumbers: true,
   mode: 'htmlmixed'
 });
 
