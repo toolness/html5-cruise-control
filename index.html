@@ -65,7 +65,7 @@ footer a {
       <div class="panel-heading">
         <h3 class="panel-title">
           <i class="fa fa-code"></i>
-          <a data-toggle="collapse" data-parent="#accordion" href="#challenges">
+          <a id="challenges-link" data-toggle="collapse" data-parent="#accordion" href="#challenges" title="Once you've got the hang of cruise control, try these challenges!" data-trigger="manual" data-placement="top">
             Challenges
           </a>
         </h3>
@@ -115,6 +115,7 @@ footer a {
 <script src="bootstrap3/js/bootstrap.js"></script>
 <script>
 var inCruiseControl = false;
+var timesCruiseControlled = 0;
 var cm = CodeMirror($("#source")[0], {
   value: '',
   theme: 'neo',
@@ -297,6 +298,13 @@ function reparseCode() {
         inCruiseControl = cm.options.readOnly = true;
         options.execute(el, control, function() {
           inCruiseControl = cm.options.readOnly = false;
+          timesCruiseControlled++;
+          if (timesCruiseControlled >= 2) {
+            $("#challenges-link").tooltip('show');
+            setTimeout(function() {
+              $("#challenges-link").tooltip('hide');
+            }, 4000);
+          }
           reparseCode();
         });
       });
@@ -315,6 +323,7 @@ cm.on('change', reparseCode);
 $(function() {
   cm.focus();
 
+  $("#challenges-link").tooltip();
   $.get('contents.html', function(html) {
     cm.setValue(html);
   });
