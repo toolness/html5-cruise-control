@@ -14,16 +14,18 @@ footer a {
   color: inherit;
 }
 
-.media[data-achievement] .glyphicon {
-  font-size: 20px;
+.challenge {
+  min-height: 64px;
+  min-width: 64px;
+  background-image: url(badge-grayscale.png);
+  opacity: 0.75;
+  background-size: 100%;
+  transition: opacity 1s;
 }
 
-.media[data-achievement] .glyphicon-remove {
-  color: darkred;
-}
-
-.media[data-achievement] .glyphicon-ok {
-  color: green;
+.achieved[data-achievement] .challenge {
+  background-image: url(badge.png);
+  opacity: 1.0;  
 }
 </style>
 <title>HTML5 Cruise Control Demo</title>
@@ -59,19 +61,19 @@ footer a {
       <p>Think you've got the hang of cruise control? Now try completing the following challenges by editing the HTML yourself!</p>
       <ul class="media-list">
         <li class="media" data-achievement="em">
-          <span class="pull-left media-object glyphicon glyphicon-remove"></span>
+          <div class="pull-left media-object challenge"></div>
           <div class="media-body">
             Put some <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/em" target="_blank">emphasized</a> text in the first paragraph.
           </div>
         </li>
         <li class="media" data-achievement="img">
-          <span class="pull-left media-object glyphicon glyphicon-remove"></span>
+          <div class="pull-left media-object challenge"></div>
           <div class="media-body">
             Change the first image to one from your favorite website.
           </div>
         </li>
         <li class="media" data-achievement="rebeccapurple">
-          <span class="pull-left media-object glyphicon glyphicon-remove"></span>
+          <div class="pull-left media-object challenge"></div>
           <div class="media-body">
             Change the color of the first paragraph to <a href="http://meyerweb.com/eric/thoughts/2014/06/19/rebeccapurple/" target="_blank">rebeccapurple</a>.
           </div>
@@ -285,10 +287,8 @@ function reparseCode() {
 
   Object.keys(achievements).forEach(function(name) {
     achievements[name]($("#rendering"), function(achieved) {
-      var el = $('[data-achievement="' + name + '"]');
-      $('.glyphicon', el)
-        .toggleClass('glyphicon-remove', !achieved)
-        .toggleClass('glyphicon-ok', achieved);
+      $('[data-achievement="' + name + '"]')
+        .toggleClass('achieved', achieved);
     });
   });
 }
